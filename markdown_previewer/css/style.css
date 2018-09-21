@@ -1,0 +1,38 @@
+#app {
+  padding: 10px 0;
+}
+
+.block {
+  display: block;
+  min-height: 100px;
+  background-color: #efefef;
+  margin-top: 10px;
+  border: 1px solid #cecece;
+}
+.block h3 {
+  background-color: #ddd;
+  width: 100%;
+  padding: 7px 15px;
+  font-size: 13px;
+  border-bottom: 1px solid #cecece;
+}
+.block .content {
+  padding: 10px;
+}
+
+#preview {
+  padding: 0 10px;
+}
+
+#editor-wrapper {
+  height: auto;
+  display: block;
+}
+#editor-wrapper #editor {
+  width: 100%;
+  min-height: 300px;
+}
+
+img {
+  width: 200px;
+}
