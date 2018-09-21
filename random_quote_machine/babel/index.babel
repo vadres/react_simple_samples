@@ -1,0 +1,84 @@
+const URL = 'https://gist.githubusercontent.com/camperbot' +
+            '/5a022b72e96c4c9585c32bf6a75f62d9/raw' +
+            '/e3c6895ce42069f0ee7e991229064f167fe8ccdc/quotes.json'
+
+const URL_TWEET = 'https://twitter.com/intent/tweet?hashtags=quotes&related=freecodecamp&text='
+
+const colors = [
+  '#333355',
+  '#553333',
+  '#335533',
+  '#227755',
+  '#661144',
+  '#666612',
+  '#033925',
+  '#50363f',
+  '#bb11bb',
+  "#dddd33",
+  "#22aaaa"
+];
+
+class App extends React.Component{
+   constructor(props){
+     super(props)
+     
+     this.state = {
+        quotes: [],
+        active: 'Default'
+     }
+     
+     fetch(URL)
+       .then((response) => response.json())
+       .then((json) => {
+         let index = Math.floor(Math.random() * json.quotes.length)
+         console.log(json.quotes.length)
+         this.setState({ 
+            ...this.state,
+            active:  json.quotes[index],
+            quotes: json.quotes 
+         })
+       })
+     
+       this.handleNewQuote = this.handleNewQuote.bind(this)
+   }
+   
+   handleNewQuote(event){
+     let index = Math.floor(Math.random() * this.state.quotes.length)
+     document.body.style.backgroundColor = colors[ index % 11 ]
+     this.setState({ 
+       ...this.state,
+       active:  this.state.quotes[index],
+     })   
+   }
+  
+   render(){
+     function mapLi(quote, key){
+       return <li key={key}>{quote.author}</li>
+     }
+     let text   = this.state.active.quote;
+     let author = this.state.active.author; 
+     let str = '"' + text + '" ' + author + '"';
+     const href = URL_TWEET + encodeURIComponent(str);
+                                               
+     return (
+       
+       <div id="quote-box">
+         <span id="text">
+           <i className="fa fa-quote-left"></i>
+           {this.state.active.quote}
+         </span>
+         <span id="author">
+           - {this.state.active.author}
+         </span>
+         <div className="col-md-5 offset-md-7 btns">
+           <a href={href} id="tweet-quote" className="btn btn-secondary" role="button" target="_blank"><i className="fab fa-twitter"></i></a>
+            <button onClick={this.handleNewQuote} id="new-quote"                             className="btn btn-secondary">
+                 New quote
+            </button>
+         </div>
+       </div>  
+     )
+   }
+}
+
+ReactDOM.render(<App />, document.getElementById('app'))
