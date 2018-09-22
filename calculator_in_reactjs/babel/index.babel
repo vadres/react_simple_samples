@@ -1,0 +1,177 @@
+const ops = [ "+","-","*","/" ]
+const calculate = (viewer) => {
+  if ([...ops, "."].indexOf( viewer.slice(-1)) != -1)
+     viewer = viewer.slice(0, viewer.length - 1)
+  
+  let result = viewer.split("+").map( (mult) => {
+    return mult.split("-").map((div) => {
+      return div.split("/").map((sub) => {
+        return sub.split("*").reduce( (acc, el) => Number(acc) * Number(el) )
+      }).reduce( (acc, el) => Number(acc) / Number(el) )
+    }).reduce( (acc, el) => Number(acc) - Number(el) )
+  }).reduce( (acc, el) => Number(acc) + Number(el) ) 
+  
+  return result + ""
+}
+const operation = (op, viewer) => {
+  if (viewer.slice(-1) == ".")
+    return viewer;
+  if (ops.indexOf( viewer.slice(-1) ) != - 1)
+    return viewer.slice(0, viewer.length - 1) + op  
+  return viewer + op
+}
+const number = (n, viewer) => {
+  if (viewer == "0") 
+    return n
+  let arr = viewer.split(/[+]|[-]|[*]|[\/]/).filter((el) => el != "")
+  return viewer + n
+}
+const pointer = (p, viewer) => {
+  let arr = viewer.split(/[+]|[-]|[*]|[\/]/).filter((el) => el != "")
+  return !isNaN( arr[arr.length - 1] ) && 
+         !arr[arr.length - 1].includes(".")? viewer + '.': viewer;                 
+}
+
+const Row = (props) => {
+  return (
+    <div className={`row ${props.grid}`}>{props.children}</div>
+  )
+}
+
+class Calculator extends React.Component {
+  constructor(props){
+    super(props)
+    
+    this.state = {
+      viewer: "0",
+      released: false
+    }
+    
+    this.sendToViewer = this.sendToViewer.bind(this)
+  } 
+  
+  sendToViewer(event){
+    let viewer = "0"
+    let viewerState = this.state.viewer
+    let released = false
+    let value  = event.target.innerHTML
+    
+    if (this.state.released){
+      this.setState({
+        viewer: "0",
+        released
+      })
+      viewerState = "0"
+    }
+    
+    // CALCULATE ---
+    if (value == "="){
+      viewer = calculate(viewerState)
+      if (isNaN(viewer) || viewer == Infinity)
+        released = true
+    }
+    // OPERATION --- 
+    else if (ops.indexOf( value ) != -1){
+      viewer = operation(value, viewerState)
+    }
+    // NUMBER ---
+    else if (!isNaN(value)){
+      viewer = number(value, viewerState)
+    }
+    // AC ---
+    else if (value == "AC"){
+      viewer = "0"
+    }
+    // Pointer ---
+    else {
+      viewer = pointer(value, viewerState)
+    }
+    
+    this.setState({
+      viewer,
+      released
+    })
+  }
+  
+  render(){
+     
+    return (
+      <div id="calculator">
+        <span className="title">Calculadora ReactJS</span>
+        <div className="container">
+          <Row>
+            <Viewer value={this.state.viewer} />
+          </Row>
+
+          <Row>
+            <Button handleclick={this.sendToViewer} color="bg-red" grid="col-6" value="AC" id="clear" />
+            <Button handleclick={this.sendToViewer} color="bg-dk-light" grid="col" value="/" id="divide" />
+            <Button handleclick={this.sendToViewer} color="bg-dk-light" grid="col" value="*" id="multiply" />
+          </Row>  
+
+          <Row>
+            <Button handleclick={this.sendToViewer} color="bg-dk" grid="col" value="7" id="seven" />
+            <Button handleclick={this.sendToViewer} color="bg-dk" grid="col" value="8" id="eight" />
+            <Button handleclick={this.sendToViewer} color="bg-dk" grid="col" value="9" id="nine" />
+            <Button handleclick={this.sendToViewer} color="bg-dk-light" grid="col" value="-" id="subtract" />
+          </Row>  
+
+          <Row>
+            <Button handleclick={this.sendToViewer} color="bg-dk" grid="col" value="4" id="four" />
+            <Button handleclick={this.sendToViewer} color="bg-dk" grid="col" value="5" id="five" />
+            <Button handleclick={this.sendToViewer} color="bg-dk" grid="col" value="6" id="six" />
+            <Button handleclick={this.sendToViewer} color="bg-dk-light" grid="col" value="+" id="add" />
+          </Row>  
+
+          <Row>
+            <div className="col-9">
+              <Row>
+                <Button handleclick={this.sendToViewer} color="bg-dk" grid="col" value="1" id="one" />
+                <Button handleclick={this.sendToViewer} color="bg-dk" grid="col" value="2" id="two" />
+                <Button handleclick={this.sendToViewer} color="bg-dk" grid="col" value="3" id="three" />
+              </Row>
+              <Row>
+                <Button handleclick={this.sendToViewer} color="bg-dk" grid="col" value="0" id="zero" />
+                <Button handleclick={this.sendToViewer} color="bg-dk" grid="col" value="." id="decimal" />
+              </Row>
+            </div>
+            <div className="col">
+              <Button handleclick={this.sendToViewer} value="=" color="bg-dk-light"  id="equals" style={{paddingTop:'45', paddingBottom:'46'}} />
+            </div>  
+          </Row>  
+        </div>  
+      </div>
+    )
+  }
+}
+
+class Viewer extends React.Component {
+  constructor(props) {
+    super(props)
+  } 
+  
+  render(){
+    return (
+      <div id="viewer-wrapper">
+        <span id="display">{this.props.value}</span>
+      </div>
+    )
+  }
+}
+
+class Button extends React.Component {
+  constructor(props){
+    super(props)
+  }
+  
+  render(){
+    
+    return (
+      <div className={this.props.grid}>
+        <a id={this.props.id} style={this.props.style} className={`button ${this.props.color}`} onClick={this.props.handleclick} href="javascript:void(0)">{this.props.value}</a>
+      </div>  
+    )
+  } 
+}
+
+ReactDOM.render(<Calculator />, document.getElementById('app'))
