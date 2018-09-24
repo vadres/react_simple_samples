@@ -1,0 +1,188 @@
+class Pomodoro extends React.Component {
+  constructor(props){ 
+    super(props)
+    
+    this.state = {
+      titlePomodoro: "Session",
+      time: 1,
+      session: 25,
+      break: 5/50,
+      pause: true
+    }
+    
+    this.mountTimer = this.mountTimer.bind(this)
+    this.decrementTime = this.decrementTime.bind(this)
+    this.reload = this.reload.bind(this)
+    this.controlSession = this.controlSession.bind(this)
+    this.playPause = this.playPause.bind(this)
+  }
+  
+  componentDidMount(){
+    this.decrementTime()
+  }
+  
+  mountTimer(){
+    let sec = this.state.time % 60
+    let min = (this.state.time - sec) / 60
+    
+    sec = sec < 10? "0"+sec:sec
+    min = min < 10? "0"+min:min
+    
+    return `${min}:${sec}`
+  }
+  
+  controlSession(isSession = true, inc = true){
+    
+    if (this.state.pause) {
+      let s = isSession? inc? this.state.session + 1: this.state.session - 1: this.state.session;
+      let b = !isSession? inc? this.state.break + 1: this.state.break - 1: this.state.break;
+      
+      s = s < 1? 1: s > 60? 60: s;
+      b = b < 1? 1: b > 60? 60: b;
+      
+      this.setState({
+        ...this.state,
+        session: s,
+        break: b,
+        time: s * 60
+      })
+    }
+    
+  }
+  
+  playPause(){
+    this.setState({
+      ...this.state,
+      pause: !this.state.pause
+    })
+    
+  }
+  
+  decrementTime(){
+    if (!this.state.pause){
+      this.setState({
+        ...this.state,
+        time: this.state.time - 1
+      }) 
+      if (this.state.time == -1){
+        let time  = this.state.titlePomodoro == "Session"? this.state.break * 60: this.state.session * 60
+        let title = this.state.titlePomodoro == "Session"? "Break": "Session"
+        this.setState({
+          ...this.state,
+          time: time,
+          titlePomodoro: title
+        })  
+        this.audioBeep.play()
+      }
+    }
+    setTimeout(()=> { this.decrementTime() }, 1000)
+  }
+  
+  reload(){
+    this.setState({
+      ...this.state,
+      titlePomodoro: "Session",
+      pause: true,
+      break: 5,
+      session: 25,
+      time: 1500
+    })
+    this.audioBeep.pause()
+    this.audioBeep.currentTime = 0;
+  }
+  
+  render(){
+    let color = this.state.time <= 60? {color:"#883333"}: {color:"#eee"}
+    
+    return (
+      <div className="pomodoro-wrapper">
+        <h1>Pomodoro Clock</h1>
+        <ControlSession 
+          incSession={()=>{ this.controlSession(true, true) }}
+          decSession={()=>{ this.controlSession(true, false) }}
+          incBreak={()=>{ this.controlSession(false, true) }}
+          decBreak={()=>{ this.controlSession(false, false) }} 
+          break={this.state.break} 
+          session={this.state.session} />
+        
+        <div className="pomodoro" style={color}>
+          <h2 id="timer-label">{this.state.titlePomodoro}</h2>
+          <Timer time={this.mountTimer()} />
+        </div>
+        
+        <ControlTimer 
+          reload={this.reload} 
+          playPause={this.playPause} />
+        
+         <audio id="beep" preload="auto" 
+          src="https://goo.gl/65cBl1"
+          ref={(audio) => { this.audioBeep = audio; }} />
+      </div>
+    )
+  }
+}
+
+const ControlSession = (props) => {
+  return (
+    <div className="control-session">
+      <div className="break">
+        <h4 id="break-label">Break control</h4>
+          <button id="break-increment" onClick={props.incBreak}>
+            <i className="fas fa-arrow-alt-circle-up"></i>
+          </button>  
+          <span id="break-length" style={{margin:"0px 5px"}}>{props.break}</span>
+          <button id="break-decrement"  onClick={props.decBreak}>
+            <i className="fas fa-arrow-alt-circle-down"></i>
+          </button>  
+      </div>
+      <div className="session">
+        <h4 id="session-label">Session control</h4>
+           <button id="session-increment"  onClick={props.incSession}>
+            <i className="fas fa-arrow-alt-circle-up"></i>
+          </button>  
+          <span id="session-length" style={{margin:"0px 5px"}}>{props.session}</span>
+          <button id="session-decrement" onClick={props.decSession}>
+            <i className="fas fa-arrow-alt-circle-down"></i>
+          </button>  
+      </div>
+     
+    </div>
+  )
+}
+
+const ControlTimer = (props) => {
+  return (
+    <div className="control-timer">
+      <Button handleClick={props.playPause} id="start_stop" dual={true} />
+      <Button handleClick={props.reload} id="reset" icon="redo-alt" />
+    </div>  
+  )
+}
+
+const Timer = (props) => {
+  return (
+    <div className="time-wrapper">
+      <span id="time-left">{props.time}</span>
+    </div>
+  )
+}
+
+const Button = (props) => {
+  if (props.dual) {
+    return (
+      <button id={props.id} onClick={props.handleClick}>
+        <i className="fas fa-play"></i>
+        <i className="fas fa-pause"></i>
+      </button>
+    )
+  } else {
+    return (
+      <button id={props.id} onClick={props.handleClick}>
+        <i className={`fas fa-${props.icon}`}></i>
+      </button>
+    )
+  }
+}
+
+
+ReactDOM.render(<Pomodoro />, document.getElementById('app'))
