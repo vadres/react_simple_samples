@@ -1,0 +1,58 @@
+const map = {
+  1: [ '', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'],
+  2: [ '', 'X', 'XX', 'XXX', 'XL', 'L', 'LX', 'LXX', 'LXXX', 'XC'],
+  3: [ '', 'C', 'CC', 'CCC', 'CD', 'D', 'DC', 'DCC', 'DCCC', 'CM'],
+  4: [ '', 'M', 'MM', 'MMM', 'MV', 'V', 'VM', 'VMM', 'VMMM', 'IX']
+}
+
+class RomanJS extends React.Component {
+  constructor(props){
+    super(props)
+    
+    this.state = {
+      value: 3456,
+      roman: 'MMMCDLVI'
+    }
+    
+    this.handleChange = this.handleChange.bind(this)
+    this.convert = this.convert.bind(this)
+  }
+  
+  convert(num){
+    let roman = ""
+    for (let i = 0; i < num.length; i++){
+      roman += map[num.length - i][num.charAt(i)]
+    }
+    return roman;
+  }
+  
+  handleChange(event){
+    let str = event.target.value.split(/[^0-9]/).join("")
+    let value = 0
+    if (event.target.value != ""){
+      value = !isNaN(str)? 
+               parseInt(str) + "":
+               0   
+      value = value.length > 4? 
+              value.slice(0,4): 
+              value
+    }
+   
+    this.setState({
+      roman: this.convert(value),
+      value: value
+    })
+  }
+  
+  render(){
+    return (
+      <div className="roman-js">
+        <h1>DECIMAL TO ROMAN</h1>
+        <input onChange={this.handleChange} type="text" value={this.state.value} />
+        <span id="roman-number">{this.state.roman}</span>
+      </div>  
+    )
+  }
+}
+
+ReactDOM.render(<RomanJS />, document.getElementById('app'))
