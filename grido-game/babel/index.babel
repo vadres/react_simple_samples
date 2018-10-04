@@ -1,0 +1,321 @@
+const AREA_WIDTH    = 70
+const AREA_HEIGHT   = 70
+const AREA_LINE     = 4
+const PERSON_RADIUS = 20
+const GRID_SIZE = 4;
+const KEYS = {
+  37: 'left',  65: 'left',
+  38: 'up',    87: 'up',
+  39: 'right', 68: 'right',
+  40: 'down',  83: 'down'
+}
+const POS = [
+  [[37,37], [114,37], [193,37], [271,37], [349,37]],
+  [[37,114],[114,114],[193,114],[271,114],[349,114]],
+  [[37,193],[114,193],[193,193],[271,193],[349,193]],
+  [[37,271],[114,271],[193,271],[271,271],[349,271]],
+  [[37,349],[114,349],[193,349],[271,349],[349,349]]
+]
+
+const generateGrid = () => {
+  let grid = []
+  for (let i = 0; i < GRID_SIZE; i++){
+    grid[i] = []
+    for (let u = 0; u < GRID_SIZE; u++){
+      grid[i][u] = 0  
+    }
+  }
+  grid[0][0] = 1
+  return grid
+}
+
+const circle = (props) => {
+  const { ctx, x, y, radius } = props
+  const img = document.getElementById("head")
+ // ctx.beginPath();
+ // ctx.arc(x, y, radius, 0, Math.PI * 2)
+ // ctx.fillStyle = "rgba(120, 120, 140, 1)";
+ // ctx.fill()
+  ctx.drawImage(img, x-25, y-25, 50, 50)
+}
+
+const area = (props) => {
+  const { ctx, x, y, width, height, lineWidth, visited } = props
+  ctx.lineWidth = lineWidth
+  ctx.strokeStyle = "rgba(245,162,25, 0.3)"
+  
+  if (visited == 1){
+    ctx.fillStyle = 'rgba(120,120,220,0.4)';
+    ctx.fillRect(x,y,width, height)
+  }
+  
+  ctx.strokeRect(x, y, width, height)
+}
+
+const roundArea = function (props) {
+  let { ctx, x, y, width, height, radius, lineWidth, visited } = props
+  ctx.lineWidth = lineWidth
+  ctx.strokeStyle = "rgba(245,162,25, 0.3)"
+  
+  if (width < 2 * radius) radius = width / 2;
+  if (height < 2 * radius) radius = height / 2;
+  if (visited == 1){
+    ctx.beginPath();
+    ctx.moveTo(x+radius, y);
+    ctx.arcTo(x+width, y,   x+width, y+height, radius);
+    ctx.arcTo(x+width, y+height, x,   y+height, radius);
+    ctx.arcTo(x,   y+height, x,   y,   radius);
+    ctx.arcTo(x,   y,   x+width, y,   radius);
+    ctx.fillStyle = 'rgba(160,160,180,0.4)';
+    ctx.fill()
+  }
+  ctx.beginPath();
+  ctx.moveTo(x+radius, y);
+  ctx.arcTo(x+width, y,   x+width, y+height, radius);
+  ctx.arcTo(x+width, y+height, x,   y+height, radius);
+  ctx.arcTo(x,   y+height, x,   y,   radius);
+  ctx.arcTo(x,   y,   x+width, y,   radius);
+  ctx.stroke();
+}
+
+const line = (props) => {
+  const accumulate = (AREA_WIDTH / 5)
+  const { ctx, x, y, lineWidth } = props
+  ctx.lineWidth = lineWidth
+  ctx.strokeStyle = "rgba(0,0,0,0.2)"
+  ctx.beginPath()
+  ctx.moveTo(x-accumulate, y-accumulate)
+  ctx.lineTo(x+accumulate, y+accumulate)
+  ctx.stroke()
+  
+  ctx.beginPath()
+  ctx.moveTo(x+accumulate, y-accumulate)
+  ctx.lineTo(x-accumulate, y+accumulate)
+  ctx.stroke()
+}
+
+const axis = (props) => {
+  const { ctx, x, y, radius } = props
+  const img = document.getElementById("axis")
+  ctx.drawImage(img, x-15, y-15, 30, 30)
+}
+
+class Grido extends React.Component {
+  constructor(props){
+    super(props)
+    
+    this.state = { 
+      win: false,
+      title: 'Jogando',
+      classTitle: 'title',
+      points: 0,
+      x: 0,
+      y: 0,
+      gameon: true,
+      grid: generateGrid()
+    }    
+    
+    this.listenerKeyUp = this.listenerKeyUp.bind(this)
+    this.mountBoard = this.mountBoard.bind(this)
+    this.verifyArea = this.verifyArea.bind(this)
+    this.verifyGameover = this.verifyGameover.bind(this)
+    this.reset = this.reset.bind(this)
+    this.calculatePoints = this.calculatePoints.bind(this)
+    document.addEventListener('keyup', this.listenerKeyUp)
+  }
+  
+  componentDidMount(){
+    setTimeout(() => { this.mountBoard() }, 200)
+  }
+  
+  mountBoard(){
+    const ctx = this.canvas.getContext("2d")
+    ctx.clearRect(0,0,400,400)
+    
+    for (let l = 0; l < GRID_SIZE; l++){
+      for (let c = 0; c < GRID_SIZE; c++){
+        roundArea({
+          radius: 10,
+          ctx: ctx, 
+          x: AREA_WIDTH * (c * 1.12) + 2, 
+          y: AREA_HEIGHT * (l * 1.12) + 2,
+          lineWidth: AREA_LINE, 
+          width: AREA_WIDTH, 
+          height: AREA_HEIGHT,
+          visited: this.state.grid[ l ][ c ]
+        })
+      }
+    }
+    
+    axis({
+      ctx: ctx,
+      x: POS[ GRID_SIZE - 1 ][ GRID_SIZE - 1 ][0],
+      y: POS[ GRID_SIZE - 1 ][ GRID_SIZE - 1 ][0],
+      lineWidth: AREA_LINE
+    })
+    
+    circle({
+      ctx: ctx,
+      x: POS[ this.state.x ][ this.state.y ][0],
+      y: POS[ this.state.x ][ this.state.y ][1],
+      radius: PERSON_RADIUS,
+      startAngle: 0
+    })
+  }
+  
+  verifyArea(x, y){
+    return (x >= 0 && x < GRID_SIZE) &&
+           (y >= 0 && y < GRID_SIZE) &&
+           (this.state.grid[ x ][ y ] === 0)
+  }
+  
+  verifyGameover(){
+    const boundsEx = (arr, x, y, bool) => {
+      try { arr[x][y] = arr[x][y] } catch(e){ return 0 }
+      
+      if (arr[x][y] == 0) return 1
+      
+      return 0
+    }
+    
+    const gameover = () => {
+       let win = this.state.points === 375;
+       title = win? "Tô zuando":"GAME OVeR"
+       this.setState({
+         ...this.state,
+         gameon: false,
+         win: win,
+         title: title,
+         classTitle: 'title gameover'
+       })
+      
+      if (!win)
+        this.timeout = setTimeout(()=>{ this.reset() }, 60000)
+    }
+    
+    const { x, y, grid } = this.state
+    let bool = 0;
+    
+    bool += boundsEx(grid, x, y, bool)
+    bool += boundsEx(grid, x+1, y, bool) 
+    bool += boundsEx(grid, x, y+1, bool) 
+    bool += boundsEx(grid, x+1, y+1, bool)
+    bool += boundsEx(grid, x-1, y, bool)
+    bool += boundsEx(grid, x, y-1, bool) 
+    bool += boundsEx(grid, x-1, y-1, bool) 
+    
+    if (x == GRID_SIZE -1 && y == GRID_SIZE - 1) bool = -1
+    
+    if (bool == 0 || bool == -1)
+      gameover()
+  }
+  
+  reset(){
+    clearTimeout(this.timeout)
+    const promise = () => new Promise((resolve, reject) => {
+      this.setState({ 
+        title: 'Jogando',
+        classTitle: 'title',
+        points: 0,
+        gameon: true,
+        x: 0,
+        y: 0,
+        grid: generateGrid()
+      })  
+      resolve()
+    })
+    
+    promise().then(() => { this.mountBoard() })
+  }
+  
+  listenerKeyUp(event){
+    let { x, y } = this.state
+    switch(KEYS[ event.keyCode ]){
+      case 'left':
+        y--
+        break
+      case 'up':
+        x--
+        break
+      case 'right':
+        y++
+        break
+      case 'down':
+        x++
+        break
+      default:
+    }
+    
+    if (this.state.gameon && this.verifyArea(x, y)) {
+      let points = this.state.points + 25
+      let grid = [ ...this.state.grid ]
+      grid[x][y] = 1
+      
+      this.setState({
+        ...this.state,
+        grid: grid,
+        x: x,
+        y: y,
+        points: points
+      })
+      
+      this.mountBoard()
+      this.verifyGameover()
+      event.preventDefault()
+    }
+  }
+  
+  calculatePoints(){
+    return this.state.grid.map((item) => (
+       item.reduce((acc, val) => acc + val, 0)                              
+    )).reduce((acc, val) => acc + val, 0)
+  }
+  
+  render(){
+    return (
+      <div id="content">
+        <img style={{position:'absolute',left: 10000}} id="head" width="50" height="50" src="https://static.thenounproject.com/png/58041-200.png" />
+        <img style={{position:'absolute',left: 10000}} id="axis" width="50" height="50" src="http://pngimage.net/wp-content/uploads/2018/06/icon-x-png-3.png" />
+        
+        <article>
+          <h1>GRIDO GAME</h1>
+          <p>Ajude Kakaroto a se teletransportar pelas salas e derrotar todos os inimigos</p>
+          <h2>REGRAS</h2>
+          <List>
+            <ListItem icon="angle-right">Use as teclas: 
+              <List>
+                <ListItem icon="angle-double-right">Seta cima, W - Cima</ListItem>
+                <ListItem icon="angle-double-right">Seta direita, D - Direita</ListItem>
+                <ListItem icon="angle-double-right">Seta baixo, S - Baixo</ListItem>
+                <ListItem icon="angle-double-right">Seta esquerda, A - esquerda</ListItem>
+              </List>
+            </ListItem>
+            <ListItem icon="angle-right">A última área visitada deve ser a marcada com um X</ListItem>
+            <ListItem icon="angle-right">Você deve pintar todas as áreas do grid</ListItem>
+            <ListItem icon="angle-right">Você não pode voltar a uma área já visitada</ListItem>
+          </List>
+        </article>
+        <div className="container">
+          <span style={{display: this.state.win? 'block': 'none'}} className="title">Kakaraleo! Diz ae, como ce ganhou sá merda?!</span>
+          <span style={{display: !this.state.gameon? 'block': 'none'}} className="title">Kakaraleo! A terra foi destruída, e a culpa é tua!!</span>
+          <div className="descriptions">
+            <span className={this.state.classTitle}>{this.state.title}</span>
+            <span className="points">Pontos: {this.state.points}</span>
+          </div>
+          <canvas ref={(canvas) => { this.canvas = canvas; }}  width="320" height="320" id="grido"></canvas>
+          <button onClick={this.reset}>COMEÇAR DE NOVO</button>
+        </div>  
+      </div>  
+    )
+  }
+}
+
+const List = (props) => (
+  <ul>{props.children}</ul>
+)
+
+const ListItem = (props) => (
+  <li><i className={`fas fa-${props.icon}`}></i> {props.children}</li>
+)
+
+ReactDOM.render(<Grido />, document.getElementById('app'))

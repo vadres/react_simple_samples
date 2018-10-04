@@ -1,0 +1,126 @@
+* {
+  box-sizing: border-boxing;
+}
+body{
+  overflow: hidden;
+  font-family: 'Open sans';
+  background: #dfdfdf;
+}
+#app{
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  #content{
+    display: flex;
+    width: 800px;
+    height: 400px;
+    .container {
+      width: 100%;
+    }
+    button {
+      border: 1px solid rgba(0,0,0,0.15);
+      color: #eee;
+      border-radius: 4px;
+      padding: 7px;
+      margin-left: 30px;
+      background-color: #8888AA;
+      float: left;
+      transition: 0.2s ease all;
+      &:hover{
+        color: white;
+        background-color: lighten(#8888AA, 7%);
+      }
+      &:active {
+        background-color: darken(#8888AA, 2%);
+        box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        outline: 0;
+      }
+      &:focus{
+        outline: 0;
+      }
+        
+    }  
+    
+    canvas {
+      display: block;
+      margin: 0 auto;
+    }
+    h1{ 
+      animation: size-out 3s infinite linear;          
+      font-size: 2em; 
+    }
+    h2 {
+       animation: size-out 2.5s infinite ease-out;         
+    }
+    .title {
+      color: #888833;
+      text-align: center;
+      animation: opacity-var 1s infinite;
+    }
+    .descriptions {
+      display: flex;
+      Justify-content: space-between;
+      text-transform: uppercase;
+      .title {
+        color: #888833;
+        font-size: 25px;
+        width: 45%;
+        padding-bottom: 10px;
+        animation-name: opacity-var;
+        animation-duration: 1s;
+        animation-iteration-count: infinite;
+      }
+      .gameover {
+        color: #883333;
+      }
+      .points {
+        padding-top: 10px;
+        width: 28%;
+      }
+    }
+    article {
+      margin-top: -30px;
+      width: 100%;
+      flex-grow: 1;
+      padding: 0 15px;
+    } 
+    p {
+      width: 100%;
+      flex-grow: 1;
+    }
+    
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      li {
+        padding: 2px 0;
+        ul {
+          padding-left: 15px;
+        }
+      }
+    }
+  }
+}
+
+@keyframes opacity-var {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes size-out {
+  0% {
+    transform: scale(1)
+  }
+  50% {
+    transform: scale(1.01)
+  }
+}
