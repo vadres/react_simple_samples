@@ -1,5 +1,5 @@
 * {
-  box-sizing: border-boxing;
+  box-sizing: border-box;
 }
 body{
   overflow: hidden;
@@ -102,6 +102,41 @@ body{
       }
     }
   }
+}
+
+@media(max-width: 450px){
+  #app{
+    padding-bottom: 10px;
+    #content{
+      width: 900px; 
+      justify-content: space-around;
+      
+      h1{
+        font-size: 1.1em;
+      }
+      h2{
+        font-size: 1.05em;
+      }
+      article {
+        display: none;
+      }
+      article, .container {
+        transform: scale(0.9);
+      }
+      .descriptions {
+        .title {
+          font-size: 13px;
+        }
+        .points{
+          font-size: 11px;
+        }
+      }
+    }  
+  }
+  body {
+    overflow-y: auto;
+  }
+  
 }
 
 @keyframes opacity-var {

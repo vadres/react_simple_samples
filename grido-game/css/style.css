@@ -1,13 +1,11 @@
 * {
-  box-sizing: border-boxing;
+  box-sizing: border-box;
 }
-
 body {
   overflow: hidden;
   font-family: 'Open sans';
   background: #dfdfdf;
 }
-
 #app {
   height: 100vh;
   display: flex;
@@ -28,7 +26,7 @@ body {
   border-radius: 4px;
   padding: 7px;
   margin-left: 30px;
-  background-color: #8888AA;
+  background-color: #88a;
   float: left;
   transition: 0.2s ease all;
 }
@@ -56,7 +54,7 @@ body {
   animation: size-out 2.5s infinite ease-out;
 }
 #app #content .title {
-  color: #888833;
+  color: #883;
   text-align: center;
   animation: opacity-var 1s infinite;
 }
@@ -66,7 +64,7 @@ body {
   text-transform: uppercase;
 }
 #app #content .descriptions .title {
-  color: #888833;
+  color: #883;
   font-size: 25px;
   width: 45%;
   padding-bottom: 10px;
@@ -75,7 +73,7 @@ body {
   animation-iteration-count: infinite;
 }
 #app #content .descriptions .gameover {
-  color: #883333;
+  color: #833;
 }
 #app #content .descriptions .points {
   padding-top: 10px;
@@ -102,7 +100,36 @@ body {
 #app #content ul li ul {
   padding-left: 15px;
 }
-
+@media (max-width: 450px) {
+  #app {
+    padding-bottom: 10px;
+  }
+  #app #content {
+    width: 900px;
+    justify-content: space-around;
+  }
+  #app #content h1 {
+    font-size: 1.1em;
+  }
+  #app #content h2 {
+    font-size: 1.05em;
+  }
+  #app #content article {
+    display: none;
+  }
+  #app #content article, #app #content .container {
+    transform: scale(0.9);
+  }
+  #app #content .descriptions .title {
+    font-size: 13px;
+  }
+  #app #content .descriptions .points {
+    font-size: 11px;
+  }
+  body {
+    overflow-y: auto;
+  }
+}
 @keyframes opacity-var {
   0% {
     opacity: 1;
